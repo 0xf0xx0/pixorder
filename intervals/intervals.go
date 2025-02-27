@@ -83,6 +83,7 @@ func Random(interval []types.PixelWithMask) {
 		}
 		j += randLength
 	}
+
 	commonSort(stretches, interval)
 }
 

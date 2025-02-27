@@ -1,5 +1,6 @@
 package patterns_test
-
+/// i need to expand this to the whole repo
+/// ...lazyyyyyy
 import (
 	//"fmt"
 	"crypto/rand"

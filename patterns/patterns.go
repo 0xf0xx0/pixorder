@@ -9,7 +9,7 @@ import (
 	"pixelsort_go/types"
 )
 
-var Loader = map[string]func(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any){
+var Loader = map[string]func(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any){
 	/// theres a better way, right? please tell me im dumb
 	"rowload":    LoadRow,
 	"spiralload": LoadSpiral,
@@ -21,7 +21,7 @@ var Saver = map[string]func(outputImg *image.RGBA, rows *[][]types.PixelWithMask
 	"seamsave":   SaveSeamCarving,
 }
 
-func LoadRow(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any) {
+func LoadRow(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds().Max
 	/// split image into rows
 	rows := make([][]types.PixelWithMask, dims.Y)
@@ -30,7 +30,7 @@ func LoadRow(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any) 
 
 		for x := 0; x < dims.X; x++ {
 			pixel := img.RGBAAt(x, y)
-			masked := mask.RGBAAt(x, y).R
+			masked := mask.GrayAt(x, y).Y
 			wrapped := types.PixelWithMask{R: pixel.R, G: pixel.G, B: pixel.B, A: pixel.A, Mask: masked}
 			row[x] = wrapped
 		}
@@ -53,7 +53,7 @@ func SaveRow(outputImg *image.RGBA, rows *[][]types.PixelWithMask, dims image.Re
 // / based on https://github.com/jeffThompson/PixelSorting/blob/master/SpiralSortPixels/SpiralSortPixels.pde
 // / prayge, i'm not a mathy fomx
 // / lots of help from fren fixing it
-func LoadSpiral(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any) {
+func LoadSpiral(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds().Max
 	width := dims.X
 	height := dims.Y
@@ -72,25 +72,25 @@ func LoadSpiral(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, an
 		/// right
 		for x := left; x <= right; x++ {
 			pixel := img.RGBAAt(x, top)
-			maskVal := mask.RGBAAt(x, top).R
+			maskVal := mask.GrayAt(x, top).Y
 			seam = append(seam, types.PixelWithMaskFromColor(pixel, maskVal))
 		}
 		/// down
 		for y := top + 1; y <= bottom; y++ {
 			pixel := img.RGBAAt(right, y)
-			maskVal := mask.RGBAAt(right, y).R
+			maskVal := mask.GrayAt(right, y).Y
 			seam = append(seam, types.PixelWithMaskFromColor(pixel, maskVal))
 		}
 		/// left
 		for x := right - 1; x > left; x-- {
 			pixel := img.RGBAAt(x, bottom)
-			maskVal := mask.RGBAAt(x, bottom).R
+			maskVal := mask.GrayAt(x, bottom).Y
 			seam = append(seam, types.PixelWithMaskFromColor(pixel, maskVal))
 		}
 		/// up
 		for y := bottom; y > top; y-- {
 			pixel := img.RGBAAt(left, y)
-			maskVal := mask.RGBAAt(left, y).R
+			maskVal := mask.GrayAt(left, y).Y
 			seam = append(seam, types.PixelWithMaskFromColor(pixel, maskVal))
 		}
 
@@ -136,7 +136,7 @@ func SaveSpiral(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims imag
 	return outputImg
 }
 // https://github.com/jeffThompson/PixelSorting/tree/master/SortThroughSeamCarving/SortThroughSeamCarving
-func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any) {
+func LoadSeamCarving(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds()
 
 	/// grayscale
@@ -171,7 +171,7 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 				G:    rawPix[1],
 				B:    rawPix[2],
 				A:    rawPix[3],
-				Mask: mask.Pix[index],
+				Mask: mask.Pix[index/4],
 			}
 		}
 		seams[bi] = seam

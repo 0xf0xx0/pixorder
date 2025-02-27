@@ -73,7 +73,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:    "interval",
-				Value:   "random",
+				Value:   "row",
 				Aliases: []string{"I"},
 				Usage:   fmt.Sprintf("interval `func`tion to use [%s]", strings.Join(validIntervals, ", ")),
 				Action: func(ctx *cli.Context, v string) error {
@@ -350,7 +350,7 @@ func sortingTime(input, output, maskpath string) error {
 	b := rawImg.Bounds()
 	sortingDims := image.Rect(0, 0, b.Dx(), b.Dy())
 	img := image.NewRGBA(sortingDims)
-	mask := image.NewRGBA(sortingDims)
+	mask := image.NewGray(sortingDims)
 	draw.Draw(img, img.Bounds(), rawImg, b.Min, draw.Src)
 	rawImg = nil
 
