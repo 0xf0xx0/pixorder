@@ -167,8 +167,8 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 		seam := make([]types.PixelWithMask, pathLen)
 		/// populate path with original pixels
 		for i := 0; i < pathLen; i++ {
-			index := (i*width + path[i] + bi) * 4
-			if index+4 > byteCount {
+			index := (i*width + path[i] + bi)
+			if index >= byteCount {
 				/// :C
 				continue
 			}
@@ -192,18 +192,16 @@ func SaveSeamCarving(seams *[][]types.PixelWithMask, dims image.Rectangle, data 
 	//height := dims.Max.Y
 	byteCount := len(outputImg.Pix)
 
-	for bi := 0; bi < 1; bi++ {
+	for bi := 0; bi < width; bi++ {
 		seam := (*seams)[bi]
 		seamLen := len(seam)
 		/// write out
 		for i := 0; i < seamLen; i++ {
 			index := (i*width + path[i] + bi) * 4
-			/// ignore if we run off the edge
-			if index+4 > byteCount {
-				println(index, i*width, i, width, path[i], bi)
+			if index >= byteCount {
+				/// :C
 				break
 			}
-
 			sortedPix := seam[i]
 			outputImg.Pix[index] = sortedPix.R
 			outputImg.Pix[index+1] = sortedPix.G
