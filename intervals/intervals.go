@@ -29,9 +29,6 @@ func Sort(section []types.PixelWithMask) {
 
 // sorters
 func Shuffle(interval []types.PixelWithMask) {
-	if mathRand.Float32() > shared.Config.Randomness {
-		return
-	}
 	/// we want shuffling to respect thresholds/masks too, so
 	/// use the result to determine whether to skip or not
 	comparator := comparators.ComparatorFunctionMappings[shared.Config.Comparator]
@@ -54,6 +51,7 @@ func Smear(interval []types.PixelWithMask) {
 	smearedPixel := interval[0] /// TODO: why is this empty with an angle?
 
 	for idx := range interval {
+		// println(idx, pix.R, pix.G, pix.B, pix.A)
 		interval[idx] = smearedPixel
 	}
 }
@@ -137,17 +135,11 @@ func commonSort(stretches []types.PixelStretch, interval []types.PixelWithMask) 
 		/// grab the pixels we want
 		pixels := interval[stretch.Start:stretch.End]
 		jInit := len(pixels) - 1
-		// if shared.Config.Reverse {
-		// 	/// do a flip!
-		// 	for i, j := 0, jInit; i < j; i, j = i+1, j-1 {
-		// 		pixels[i], pixels[j] = pixels[j], pixels[i]
-		// 	}
-		// }
 		comparator := comparators.ComparatorFunctionMappings[shared.Config.Comparator]
 		slices.SortStableFunc(pixels, comparator)
 
 		if shared.Config.Reverse {
-			/// [/unflip]
+			/// do a flip!
 			for i, j := 0, jInit; i < j; i, j = i+1, j-1 {
 				pixels[i], pixels[j] = pixels[j], pixels[i]
 			}

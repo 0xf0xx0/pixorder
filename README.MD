@@ -24,7 +24,9 @@ furst time using go, might be cursed
 git clone https://github.com/0xf0xx0/pixelsort-go.git
 cd pixelsort-go
 go build
+# now move the binary, or
 go install
+# to install to your GOBIN/GOPATH
 ```
 
 ## examples/usage
