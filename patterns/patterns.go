@@ -52,9 +52,9 @@ func SaveRow(rows *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) *ima
 	return outputImg
 }
 
-/// based on https://github.com/jeffThompson/PixelSorting/blob/master/SpiralSortPixels/SpiralSortPixels.pde
-/// prayge, i'm not a mathy fomx
-/// lots of help from fren fixing it
+// / based on https://github.com/jeffThompson/PixelSorting/blob/master/SpiralSortPixels/SpiralSortPixels.pde
+// / prayge, i'm not a mathy fomx
+// / lots of help from fren fixing it
 func LoadSpiral(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds().Max
 	width := dims.X
@@ -67,9 +67,9 @@ func LoadSpiral(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, an
 		seam := make([]types.PixelWithMask, 0)
 
 		top := offset
-		bottom := height - offset -1
+		bottom := height - offset - 1
 		left := offset
-		right := width - offset-1
+		right := width - offset - 1
 
 		/// right
 		for x := left; x <= right; x++ {
@@ -78,13 +78,13 @@ func LoadSpiral(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, an
 			seam = append(seam, types.PixelWithMaskFromColor(pixel, maskVal))
 		}
 		/// down
-		for y := top+1; y <= bottom; y++ {
+		for y := top + 1; y <= bottom; y++ {
 			pixel := img.RGBAAt(right, y)
 			maskVal := mask.RGBAAt(right, y).R
 			seam = append(seam, types.PixelWithMaskFromColor(pixel, maskVal))
 		}
 		/// left
-		for x := right-1; x > left; x-- {
+		for x := right - 1; x > left; x-- {
 			pixel := img.RGBAAt(x, bottom)
 			maskVal := mask.RGBAAt(x, bottom).R
 			seam = append(seam, types.PixelWithMaskFromColor(pixel, maskVal))
@@ -109,9 +109,9 @@ func SaveSpiral(seams *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) 
 
 	for offset, seam := range *seams {
 		top := offset
-		bottom := height - offset -1
+		bottom := height - offset - 1
 		left := offset
-		right := width - offset-1
+		right := width - offset - 1
 		currPixIdx := 0
 
 		fmt.Print()
@@ -121,12 +121,12 @@ func SaveSpiral(seams *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) 
 			currPixIdx++
 		}
 		/// down
-		for y := top+1; y <= bottom; y++ {
+		for y := top + 1; y <= bottom; y++ {
 			outputImg.Set(right, y, seam[currPixIdx].ToColor())
 			currPixIdx++
 		}
 		/// left
-		for x := right-1; x > left; x-- {
+		for x := right - 1; x > left; x-- {
 			outputImg.Set(x, bottom, seam[currPixIdx].ToColor())
 			currPixIdx++
 		}
@@ -146,16 +146,15 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 	dims := img.Bounds()
 
 	/// grayscale
-	x := image.Rect(0, 0, dims.Dx(), dims.Dy())
-	grayed := image.NewGray(x)
-	draw.Draw(grayed, grayed.Bounds(), img.SubImage(x), dims.Min, draw.Src)
+	grayed := image.NewGray(dims)
+	draw.Draw(grayed, grayed.Bounds(), img.SubImage(dims), dims.Min, draw.Src)
 
 	runKernels(*grayed)
 	sums := getSums(*grayed, grayed.Rect.Max)
 
 	width := grayed.Rect.Dx()
 	height := grayed.Rect.Dy()
-	byteCount := (width * height) - 1
+	byteCount := len(grayed.Pix)
 
 	bottomIndex := width / 2
 
@@ -163,18 +162,18 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 	path = findPath(bottomIndex, sums, path, grayed.Rect.Max)
 
 	seams := make([][]types.PixelWithMask, width)
-	for i := 0; i < width; i++ {
+	for bi := 0; bi < width; bi++ {
 		pathLen := len(path)
 		seam := make([]types.PixelWithMask, pathLen)
 		/// populate path with original pixels
-		for j := 0; j < pathLen; j++ {
-			index := (j*width + path[j] + i) * 4
+		for i := 0; i < pathLen; i++ {
+			index := (i*width + path[i] + bi) * 4
 			if index+4 > byteCount {
 				/// :C
 				continue
 			}
 			rawPix := img.Pix[index : index+4]
-			seam[j] = types.PixelWithMask{
+			seam[i] = types.PixelWithMask{
 				R:    rawPix[0],
 				G:    rawPix[1],
 				B:    rawPix[2],
@@ -182,10 +181,8 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 				Mask: 0,
 			}
 		}
-		seams[i] = seam
-		//seams = append(seams, seam)
+		seams[bi] = seam
 	}
-	/// TODO: figure out how to persist path for saving
 	return &seams, path
 }
 func SaveSeamCarving(seams *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA {
@@ -194,25 +191,24 @@ func SaveSeamCarving(seams *[][]types.PixelWithMask, dims image.Rectangle, data 
 	width := dims.Max.X
 	//height := dims.Max.Y
 	byteCount := len(outputImg.Pix)
-	seamLen := len(*seams)
-	for rowI := 0; rowI < seamLen; rowI++ {
-		seam := (*seams)[rowI]
-		for i := 0; i < width; i++ {
-			seamLen := len(seam)
-			/// write out
-			for j := 0; j < seamLen; j++ {
-				index := (j*width + path[j] + i) * 4
-				/// ignore if we run off the edge
-				if index+4 > byteCount {
-					break
-				}
 
-				sortedPix := seam[j]
-				outputImg.Pix[index] = sortedPix.R
-				outputImg.Pix[index+1] = sortedPix.G
-				outputImg.Pix[index+2] = sortedPix.B
-				outputImg.Pix[index+3] = sortedPix.A
+	for bi := 0; bi < 1; bi++ {
+		seam := (*seams)[bi]
+		seamLen := len(seam)
+		/// write out
+		for i := 0; i < seamLen; i++ {
+			index := (i*width + path[i] + bi) * 4
+			/// ignore if we run off the edge
+			if index+4 > byteCount {
+				println(index, i*width, i, width, path[i], bi)
+				break
 			}
+
+			sortedPix := seam[i]
+			outputImg.Pix[index] = sortedPix.R
+			outputImg.Pix[index+1] = sortedPix.G
+			outputImg.Pix[index+2] = sortedPix.B
+			outputImg.Pix[index+3] = sortedPix.A
 		}
 	}
 	return outputImg
@@ -329,22 +325,21 @@ func findPath(bottomIndex int, sums [][]float32, path []int, dims image.Point) [
 	for i := height - 1; i > 0; i -= 1 {
 		if currIndex-1 <= 0 {
 			path[i] = 0
-			continue
 		} else if currIndex+1 >= width {
 			path[i] = width
-			continue
-		}
-		upL := sums[i-1][currIndex-1]
-		upC := sums[i-1][currIndex]
-		upR := sums[i-1][currIndex+1]
+		} else {
+			upL := sums[i-1][currIndex-1]
+			upC := sums[i-1][currIndex]
+			upR := sums[i-1][currIndex+1]
 
-		if upL < upC && upL < upR {
-			currIndex += -1
-		} else if upR < upC && upR < upL {
-			currIndex += 1
-		}
+			if upL < upC && upL < upR {
+				currIndex += -1
+			} else if upR < upC && upR < upL {
+				currIndex += 1
+			}
 
-		path[i] = currIndex
+			path[i] = currIndex
+		}
 	}
 	return path
 }
