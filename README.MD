@@ -36,7 +36,11 @@ go install
 
 **Row sort w/ default options**
 `pixelsort_go --input ~/Downloads/potm2310a.jpg --output ./examples/webb-row.jpg`
-![row sort](./examples/webb-random.jpg)
+![row sort](./examples/webb-row.jpg)
+
+**Row sort w/ threshold**
+`pixelsort_go --input ~/Downloads/potm2310a.jpg --lower_threshold 0.3 --upper_threshold 0.6 --output ./examples/webb-row-thresh.jpg`
+![row sort](./examples/webb-row-thresh.jpg)
 
 **Row sort w/ default options & mask**
 `pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --output ./examples/webb-row-masked.jpg`
