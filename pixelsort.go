@@ -411,6 +411,7 @@ func sortingTime(input, output, maskpath string) error {
 
 	/// now write
 	outputImg := patterns.Saver[fmt.Sprintf("%ssave", shared.Config.Pattern)](img, stretches, img.Bounds(), data)
+	// outputImg := patterns.Saver[fmt.Sprintf("%ssave", shared.Config.Pattern)](image.NewRGBA(sortingDims), stretches, img.Bounds(), data)
 
 	/// ET AT OR
 	if math.Mod(shared.Config.Angle, 360) != 0 {

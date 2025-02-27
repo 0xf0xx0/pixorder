@@ -136,6 +136,7 @@ func SaveSpiral(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims imag
 	return outputImg
 }
 // https://github.com/jeffThompson/PixelSorting/tree/master/SortThroughSeamCarving/SortThroughSeamCarving
+// comments copied over
 func LoadSeamCarving(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds()
 
@@ -143,12 +144,16 @@ func LoadSeamCarving(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMas
 	grayed := image.NewGray(dims)
 	draw.Draw(grayed, grayed.Bounds(), img.SubImage(dims), dims.Min, draw.Src)
 
+	// run kernels to create "energy map"
 	runKernels(*grayed)
+	// sum pathways through the image
 	sums := getSums(*grayed, grayed.Rect.Max)
 
 	width := img.Rect.Dx()
 	height := img.Rect.Dy()
 	byteCount := len(img.Pix)
+	// get start point (smallest value) - this is used to find the
+	// best seam (starting at the lowest energy)
 	bottomIndex := width / 2
 
 	path := make([]int, height)
@@ -184,6 +189,9 @@ func SaveSeamCarving(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims
 	byteCount := len(outputImg.Pix)
 
 	for bi, seam := range (*seams) {
+		// if bi > 3 && bi < len(*seams) - 3 {
+		// 	continue
+		// }
 		seamLen := len(seam)
 		/// write out
 		for i := 0; i < seamLen; i++ {
