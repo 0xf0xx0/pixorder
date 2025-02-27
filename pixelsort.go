@@ -45,7 +45,7 @@ func main() {
 	app := &cli.App{
 		Name:                   "pixelsort_go",
 		Usage:                  "Organize pixels.",
-		Version:                "0.7.0",
+		Version:                "0.8.0",
 		UseShortOptionHandling: true,
 		Flags: []cli.Flag{
 			&cli.StringSliceFlag{
