@@ -69,18 +69,18 @@ did you know webb and hubble pics are cc4?
 src img is the "large jpg" dl from [esawebb.org](https://esawebb.org/images/potm2310a/)
 ```
 => time pixelsort_go -i ~/Downloads/potm2310a.jpg -o ./benchmark
-Sorting 1 images with a config of {Pattern:row Interval:random Comparator:lightness SectionLength:69 Randomness:1 Reverse:false Thresholds:{Lower:0 Upper:1} Angle:0}.
+Sorting 1 images with a config of {Pattern:row Interval:row Comparator:lightness SectionLength:69 Randomness:1 Reverse:false Thresholds:{Lower:0 Upper:1} Angle:0}.
 Loading image 1 (/home/________/Downloads/potm2310a.jpg -> ./benchmark)...
 Sorting /home/________/Downloads/potm2310a.jpg...
-./benchmark elapsed: 1.903s
+./benchmark elapsed: 2.112s
 Writing ./benchmark...
-0:02.62 real 2.54 usermode 99% 89720 Kb mem
+0:02.78 real 2.72 usermode 99% 85124 Kb mem
 
 => time pixelsort_go -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark
-Sorting 1 images with a config of {Pattern:row Interval:random Comparator:lightness SectionLength:69 Randomness:1 Reverse:false Thresholds:{Lower:0 Upper:1} Angle:0}.
+Sorting 1 images with a config of {Pattern:row Interval:row Comparator:lightness SectionLength:69 Randomness:1 Reverse:false Thresholds:{Lower:0 Upper:1} Angle:0}.
 Loading image 1 (/home/________/Downloads/potm2310a.jpg -> ./benchmark)...
 Sorting /home/________/Downloads/potm2310a.jpg...
-./benchmark elapsed: 1.068s
+./benchmark elapsed: 1.287s
 Writing ./benchmark...
-0:02.14 real 1.99 usermode 99% 224736 Kb mem
+0:02.11 real 2.05 usermode 99% 89884 Kb mem
 ```
