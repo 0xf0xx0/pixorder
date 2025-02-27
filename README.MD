@@ -47,12 +47,21 @@ go install
 ![masked row sort](./examples/webb-row-masked.jpg)
 
 **Spiral sort w/ default options**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern spiral --output ./examples/webb-spiral.jpg`
+`pixelsort_go --input ~/Downloads/potm2310a.jpg --pattern spiral --output ./examples/webb-spiral.jpg`
 ![spiral sort](./examples/webb-spiral.jpg)
 
 **Spiral sort using most options & mask**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern spiral --interval wave --randomness 0.4 --comparator saturation --section_length 400 --output ./examples/webb-spiral.jpg`
+`pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern spiral --interval wave --randomness 0.4 --comparator saturation --section_length 400 --output ./examples/webb-spiral-masked.jpg`
 ![masked spiral sort](./examples/webb-spiral-masked.jpg)
+
+**Seam sort w/ default options**
+`pixelsort_go --input ~/Downloads/potm2310a.jpg --pattern seam --output ./examples/webb-seam.jpg`
+![seam sort](./examples/webb-seam.jpg)
+
+**Seam sort w/ default options & mask**
+`pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern seam --output ./examples/webb-seam-masked.jpg`
+![masked seam sort](./examples/webb-seam-masked.jpg)
+
 did you know webb and hubble pics are cc4?
 
 ## "benchmark"
