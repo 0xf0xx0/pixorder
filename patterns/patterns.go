@@ -1,7 +1,6 @@
 package patterns
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -114,7 +113,6 @@ func SaveSpiral(seams *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) 
 		right := width - offset - 1
 		currPixIdx := 0
 
-		fmt.Print()
 		/// right
 		for x := left; x <= right; x++ {
 			outputImg.Set(x, top, seam[currPixIdx].ToColor())
@@ -139,9 +137,7 @@ func SaveSpiral(seams *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) 
 
 	return outputImg
 }
-
 // https://github.com/jeffThompson/PixelSorting/tree/master/SortThroughSeamCarving/SortThroughSeamCarving
-// TODO
 func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds()
 
@@ -152,10 +148,9 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 	runKernels(*grayed)
 	sums := getSums(*grayed, grayed.Rect.Max)
 
-	width := grayed.Rect.Dx()
-	height := grayed.Rect.Dy()
-	byteCount := len(grayed.Pix)
-
+	width := img.Rect.Dx()
+	height := img.Rect.Dy()
+	byteCount := len(img.Pix)
 	bottomIndex := width / 2
 
 	path := make([]int, height)
@@ -167,7 +162,7 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 		seam := make([]types.PixelWithMask, pathLen)
 		/// populate path with original pixels
 		for i := 0; i < pathLen; i++ {
-			index := (i*width + path[i] + bi)
+			index := (i*width + path[i] + bi) * 4
 			if index >= byteCount {
 				/// :C
 				continue
@@ -178,7 +173,7 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 				G:    rawPix[1],
 				B:    rawPix[2],
 				A:    rawPix[3],
-				Mask: 0,
+				Mask: mask.Pix[index],
 			}
 		}
 		seams[bi] = seam

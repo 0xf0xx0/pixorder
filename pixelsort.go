@@ -80,7 +80,7 @@ func main() {
 				Usage:   fmt.Sprintf("interval `func`tion to use [%s]", strings.Join(validIntervals, ", ")),
 				Action: func(ctx *cli.Context, v string) error {
 					if !slices.Contains(validIntervals, v) {
-						return fmt.Errorf(fmt.Sprintf("invalid interval \"%s\" [%s]", v, strings.Join(validIntervals, ", ")))
+						return fmt.Errorf("invalid interval \"%s\" [%s]", v, strings.Join(validIntervals, ", "))
 					}
 					return nil
 				},
@@ -92,7 +92,7 @@ func main() {
 				Usage:   fmt.Sprintf("comparison `func`tion to use [%s]", strings.Join(validComparators, ", ")),
 				Action: func(ctx *cli.Context, v string) error {
 					if !slices.Contains(validComparators, v) {
-						return fmt.Errorf(fmt.Sprintf("invalid comparator \"%s\" [%s]", v, strings.Join(validComparators, ", ")))
+						return fmt.Errorf("invalid comparator \"%s\" [%s]", v, strings.Join(validComparators, ", "))
 					}
 					return nil
 				},
