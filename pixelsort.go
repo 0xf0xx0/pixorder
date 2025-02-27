@@ -70,6 +70,12 @@ func main() {
 				Aliases: []string{"p"},
 				Usage:   fmt.Sprintf("`pattern` loader to use [%s]", strings.Join(validPatterns, ", ")),
 				Value:   "row",
+				Action: func(ctx *cli.Context, v string) error {
+					if !slices.Contains(validPatterns, v) {
+						return fmt.Errorf("invalid interval \"%s\" [%s]", v, strings.Join(validPatterns, ", "))
+					}
+					return nil
+				},
 			},
 			&cli.StringFlag{
 				Name:    "interval",
