@@ -26,12 +26,15 @@ import (
 )
 
 func main() {
-	validIntervals := make([]string, 0)
-	validComparators := make([]string, 0)
+	validPatterns := make([]string, 0, len(patterns.Loader))
+	validIntervals := make([]string, 0, len(intervals.SortingFunctionMappings))
+	validComparators := make([]string, 0, len(comparators.ComparatorFunctionMappings))
 
-	/// ...ugh
-	/// too lazy to do patterns
-	/// its hardcoded idc, theres only 2 (half)-functional
+	for k := range patterns.Loader {
+		/// why -4, you ask? cause patterns always come in pairs, xLoad and xSave
+		/// "load" is 4 chars, so trim them off and you get the pattern name uwu
+		validPatterns = append(validPatterns, k[:len(k)-4])
+	}
 	for k := range intervals.SortingFunctionMappings {
 		validIntervals = append(validIntervals, k)
 	}
@@ -58,24 +61,19 @@ func main() {
 				},
 			},
 			&cli.StringFlag{
-				Name:    "pattern",
-				Aliases: []string{"p"},
-				Usage:   "`pattern` loader to use [row, spiral]",
-				Value:   "row",
-			},
-			&cli.StringFlag{
 				Name:    "output",
 				Aliases: []string{"o"},
 				Usage:   "`file` to output to",
 			},
 			&cli.StringFlag{
-				Name:    "mask",
-				Aliases: []string{"m"},
-				Usage:   "b&w `mask` to determine which pixels to touch; white is skipped",
+				Name:    "pattern",
+				Aliases: []string{"p"},
+				Usage:   fmt.Sprintf("`pattern` loader to use [%s]", strings.Join(validPatterns, ", ")),
+				Value:   "row",
 			},
 			&cli.StringFlag{
 				Name:    "interval",
-				Value:   "row",
+				Value:   "random",
 				Aliases: []string{"I"},
 				Usage:   fmt.Sprintf("interval `func`tion to use [%s]", strings.Join(validIntervals, ", ")),
 				Action: func(ctx *cli.Context, v string) error {
@@ -96,6 +94,11 @@ func main() {
 					}
 					return nil
 				},
+			},
+			&cli.StringFlag{
+				Name:    "mask",
+				Aliases: []string{"m"},
+				Usage:   "b&w `mask` to determine which pixels to touch; white is skipped",
 			},
 			&cli.Float64Flag{
 				Name:    "lower_threshold",
@@ -143,7 +146,7 @@ func main() {
 				Name:    "randomness",
 				Value:   1,
 				Aliases: []string{"R"},
-				Usage:   "used to determine the perccentage of [row]s to skip and how wild [wave] edges should be, among other things",
+				Usage:   "used to determine the percentage of [row]s to skip and how wild [wave] edges should be, among other things",
 				Action: func(ctx *cli.Context, v float64) error {
 					if v < 0.0 || v > 1.0 {
 						return fmt.Errorf("randomness is outside of range [0.0-1.0]")
@@ -293,6 +296,7 @@ func main() {
 			return nil
 		},
 	}
+
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
@@ -399,7 +403,7 @@ func sortingTime(input, output, maskpath string) error {
 	/// like fuck dude i just want some fucking whitespace, its not that big of a deal
 
 	/// now write
-	outputImg := patterns.Saver[fmt.Sprintf("%ssave", shared.Config.Pattern)](stretches, img.Bounds(), data)
+	outputImg := patterns.Saver[fmt.Sprintf("%ssave", shared.Config.Pattern)](img, stretches, img.Bounds(), data)
 
 	/// ET AT OR
 	if math.Mod(shared.Config.Angle, 360) != 0 {

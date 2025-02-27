@@ -15,7 +15,7 @@ var Loader = map[string]func(img *image.RGBA, mask *image.RGBA) (*[][]types.Pixe
 	"spiralload": LoadSpiral,
 	"seamload":   LoadSeamCarving,
 }
-var Saver = map[string]func(rows *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA{
+var Saver = map[string]func(outputImg *image.RGBA, rows *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA{
 	"rowsave":    SaveRow,
 	"spiralsave": SaveSpiral,
 	"seamsave":   SaveSeamCarving,
@@ -38,8 +38,7 @@ func LoadRow(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, any) 
 	}
 	return &rows, nil
 }
-func SaveRow(rows *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) *image.RGBA {
-	outputImg := image.NewRGBA(dims)
+func SaveRow(outputImg *image.RGBA, rows *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) *image.RGBA {
 	for i := 0; i < len(*rows); i++ {
 		row := (*rows)[i]
 		for j := 0; j < len(row); j++ {
@@ -100,8 +99,7 @@ func LoadSpiral(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMask, an
 
 	return &seams, nil
 }
-func SaveSpiral(seams *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) *image.RGBA {
-	outputImg := image.NewRGBA(dims)
+func SaveSpiral(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) *image.RGBA {
 
 	width := dims.Max.X
 	height := dims.Max.Y
@@ -180,8 +178,7 @@ func LoadSeamCarving(img *image.RGBA, mask *image.RGBA) (*[][]types.PixelWithMas
 	}
 	return &seams, path
 }
-func SaveSeamCarving(seams *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA {
-	outputImg := image.NewRGBA(dims)
+func SaveSeamCarving(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA {
 	path := data[0].([]int)
 	width := dims.Max.X
 	byteCount := len(outputImg.Pix)

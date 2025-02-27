@@ -13,7 +13,6 @@ import (
 var SortingFunctionMappings = map[string]func([]types.PixelWithMask){
 	"row":         Row,
 	"random":      Random,
-	"randomnoisy": RandomNoisy,
 	"shuffle":     Shuffle,
 	"smear":       Smear,
 	"wave":        Wave,
@@ -59,8 +58,7 @@ func Smear(interval []types.PixelWithMask) {
 	}
 }
 
-/// TODO:
-
+// randomly skips rows
 func Row(interval []types.PixelWithMask) {
 	if mathRand.Float32() > shared.Config.Randomness {
 		return
@@ -68,29 +66,8 @@ func Row(interval []types.PixelWithMask) {
 	commonSort([]types.PixelStretch{{Start: 0, End: len(interval)}}, interval)
 }
 
-// takes a base length and multiplies by shared.Config.Randomness,
-// then picks a random int and picks the max between it and the previous product
+// takes a randomly-sized chunk of the remaining pixels and sorts them
 func Random(interval []types.PixelWithMask) {
-	stretches := make([]types.PixelStretch, 0)
-	intervalLength := len(interval)
-	section_length := shared.Config.SectionLength
-
-	j := 0
-	for {
-		if j >= intervalLength {
-			break
-		}
-		/// so many broken limbs, call me the cast fox
-		stretchLength := max(mathRand.Int(), int(math.Floor(float64(section_length)*float64(shared.Config.Randomness))))
-		endIdx := min(j+stretchLength, intervalLength)
-		stretches = append(stretches, types.PixelStretch{Start: j, End: endIdx})
-		j += stretchLength
-	}
-	commonSort(stretches, interval)
-}
-
-// takes a random chunk of the remaining pixels and sorts them
-func RandomNoisy(interval []types.PixelWithMask) {
 	stretches := make([]types.PixelStretch, 0)
 	intervalLength := len(interval)
 
