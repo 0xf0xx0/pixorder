@@ -20,14 +20,14 @@ import (
 	"pixelsort_go/patterns"
 	"pixelsort_go/shared"
 
-	"github.com/disintegration/imaging"
+	"github.com/kovidgoyal/imaging"
 	"github.com/remeh/sizedwaitgroup"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	validPatterns := make([]string, 0, len(patterns.Loader))
-	validIntervals := make([]string, 0, len(intervals.SortingFunctionMappings))
+	validIntervals := make([]string, 0, len(intervals.IntervalFunctionMappings))
 	validComparators := make([]string, 0, len(comparators.ComparatorFunctionMappings))
 
 	for k := range patterns.Loader {
@@ -35,7 +35,7 @@ func main() {
 		/// "load" is 4 chars, so trim them off and you get the pattern name uwu
 		validPatterns = append(validPatterns, k[:len(k)-4])
 	}
-	for k := range intervals.SortingFunctionMappings {
+	for k := range intervals.IntervalFunctionMappings {
 		validIntervals = append(validIntervals, k)
 	}
 	for k := range comparators.ComparatorFunctionMappings {
@@ -47,18 +47,13 @@ func main() {
 		Usage:                  "Organize pixels.",
 		Version:                "0.8.0",
 		UseShortOptionHandling: true,
+		EnableBashCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringSliceFlag{
 				Name:     "input",
 				Aliases:  []string{"i"},
 				Usage:    "`image`(s) to sort, or a dir full of images (supported: png, jpg)",
 				Required: true,
-				Action: func(ctx *cli.Context, v []string) error {
-					if len(v) < 1 {
-						return cli.Exit("No inputs given", 1)
-					}
-					return nil
-				},
 			},
 			&cli.StringFlag{
 				Name:    "output",
@@ -79,7 +74,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:    "interval",
-				Value:   "row",
+				Value:   "none",
 				Aliases: []string{"I"},
 				Usage:   fmt.Sprintf("interval `func`tion to use [%s]", strings.Join(validIntervals, ", ")),
 				Action: func(ctx *cli.Context, v string) error {
@@ -93,7 +88,7 @@ func main() {
 				Name:    "comparator",
 				Value:   "lightness",
 				Aliases: []string{"c"},
-				Usage:   fmt.Sprintf("comparison `func`tion to use [%s]", strings.Join(validComparators, ", ")),
+				Usage:   fmt.Sprintf("pixel comparison `func`tion to use [%s]", strings.Join(validComparators, ", ")),
 				Action: func(ctx *cli.Context, v string) error {
 					if !slices.Contains(validComparators, v) {
 						return fmt.Errorf("invalid comparator \"%s\" [%s]", v, strings.Join(validComparators, ", "))
@@ -259,8 +254,7 @@ func main() {
 				masks = append(masks, "")
 				maskLen = len(masks)
 			}
-			infoString := fmt.Sprintf("Sorting %d images with a config of %+v.", inputLen, shared.Config)
-			println(infoString)
+			fmt.Println(fmt.Sprintf("Sorting %d images with a config of %+v.", inputLen, shared.Config))
 
 			/// multiple imgs
 			/// sort em first so frames dont get jumbled
@@ -290,7 +284,7 @@ func main() {
 						out = fmt.Sprintf("%s.%s", "sorted", fileSuffix)
 					}
 
-					println(fmt.Sprintf("Loading image %d (%s -> %s)...", i+1, in, out))
+					fmt.Println(fmt.Sprintf("Loading image %d (%s -> %s)...", i+1, in, out))
 					maskIdx := min(i, maskLen-1)
 					err := sortingTime(in, out, masks[maskIdx])
 					if err != nil {
@@ -352,7 +346,7 @@ func sortingTime(input, output, maskpath string) error {
 		rawImg = (*image.RGBA)(imaging.Rotate(rawImg, shared.Config.Angle, color.Transparent))
 	}
 
-	/// convert to rgba
+	/// convert to rgba (gray for the mask)
 	b := rawImg.Bounds()
 	sortingDims := image.Rect(0, 0, b.Dx(), b.Dy())
 	img := image.NewRGBA(sortingDims)
@@ -382,13 +376,13 @@ func sortingTime(input, output, maskpath string) error {
 		rawMask = nil
 	}
 
-	/// load stretches
+	/// load seams
 	loader := patterns.Loader[fmt.Sprintf("%sload", shared.Config.Pattern)]
 	if loader == nil {
 		fmt.Println("invalid pattern")
 		return cli.Exit("invalid pattern", 2)
 	}
-	stretches, data := loader(img, mask)
+	seams, data := loader(img, mask)
 	/// more whitespace
 	/// im not gonna rant again
 	/// just
@@ -397,10 +391,8 @@ func sortingTime(input, output, maskpath string) error {
 	println(fmt.Sprintf("Sorting %s...", input))
 	/// pass the rows to the sorter
 	start := time.Now()
-	for i := 0; i < len(*stretches); i++ {
-	// for i := 0; i < 10; i++ {
-		row := (*stretches)[i]
-		intervals.Sort(row)
+	for _, seam := range *seams  {
+		intervals.Sort(seam)
 	}
 	end := time.Now()
 	elapsed := end.Sub(start)
@@ -410,7 +402,7 @@ func sortingTime(input, output, maskpath string) error {
 	/// like fuck dude i just want some fucking whitespace, its not that big of a deal
 
 	/// now write
-	outputImg := patterns.Saver[fmt.Sprintf("%ssave", shared.Config.Pattern)](img, stretches, img.Bounds(), data)
+	outputImg := patterns.Saver[fmt.Sprintf("%ssave", shared.Config.Pattern)](img, seams, img.Bounds(), data)
 	// outputImg := patterns.Saver[fmt.Sprintf("%ssave", shared.Config.Pattern)](image.NewRGBA(sortingDims), stretches, img.Bounds(), data)
 
 	/// ET AT OR
@@ -422,7 +414,7 @@ func sortingTime(input, output, maskpath string) error {
 		}
 	}
 
-	println(fmt.Sprintf("Writing %s...", output))
+	fmt.Println(fmt.Sprintf("Writing %s...", output))
 	f, err := os.Create(output)
 	if err != nil {
 		return cli.Exit("Could not create output file", 1)

@@ -58,8 +58,6 @@ func Saturation(a, b types.PixelWithMask) int {
 
 	aSat := calculateSaturation(a)
 	bSat := calculateSaturation(b)
-
-	//println(aSat, bSat)
 	return int(aSat - bSat)
 }
 
@@ -70,7 +68,6 @@ func Lightness(a, b types.PixelWithMask) int {
 
 	aLightness := calculateLightness(a)
 	bLightness := calculateLightness(b)
-	//println(aLightness, bLightness)
 	return int(aLightness - bLightness)
 }
 

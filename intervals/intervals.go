@@ -10,16 +10,22 @@ import (
 	"pixelsort_go/types"
 )
 
-var SortingFunctionMappings = map[string]func([]types.PixelWithMask){
-	"row":         Row,
-	"random":      Random,
-	"shuffle":     Shuffle,
-	"smear":       Smear,
-	"wave":        Wave,
+/// an interval/seam is a full slice of pixels from shared.Config.Pattern
+/// a stretch is a section of an interval
+/// types.PixelStretch is the "skeleton" stretch
+/// i should get this straightened out
+
+// interval sorting algos
+var IntervalFunctionMappings = map[string]func([]types.PixelWithMask){
+	"none":    None,
+	"random":  Random,
+	"shuffle": Shuffle,
+	"smear":   Smear,
+	"wave":    Wave,
 }
 
 func Sort(section []types.PixelWithMask) {
-	sorter := SortingFunctionMappings[shared.Config.Interval]
+	sorter := IntervalFunctionMappings[shared.Config.Interval]
 	stretches := getUnmaskedStretches(section)
 	for i := 0; i < len(stretches); i++ {
 		stretch := stretches[i]
@@ -28,6 +34,7 @@ func Sort(section []types.PixelWithMask) {
 }
 
 // sorters
+
 func Shuffle(interval []types.PixelWithMask) {
 	/// we want shuffling to respect thresholds/masks too, so
 	/// use the result to determine whether to skip or not
@@ -40,27 +47,21 @@ func Shuffle(interval []types.PixelWithMask) {
 	})
 }
 
-// TODO
-// WHY doesnt rotation work??? :<
-// it DOES work, but only if the smear doesnt touch the edge
+// copy the furst pixel across the rest of the interval
 func Smear(interval []types.PixelWithMask) {
 	intervalLength := len(interval)
 	if intervalLength == 0 {
 		return
 	}
-	smearedPixel := interval[0] /// TODO: why is this empty with an angle?
+	smearedPixel := interval[0]
 
 	for idx := range interval {
-		// println(idx, pix.R, pix.G, pix.B, pix.A)
 		interval[idx] = smearedPixel
 	}
 }
 
-// randomly skips rows
-func Row(interval []types.PixelWithMask) {
-	if mathRand.Float32() > shared.Config.Randomness {
-		return
-	}
+// noop
+func None(interval []types.PixelWithMask) {
 	commonSort([]types.PixelStretch{{Start: 0, End: len(interval)}}, interval)
 }
 
@@ -97,7 +98,7 @@ func Wave(interval []types.PixelWithMask) {
 		if j >= intervalLength {
 			break
 		}
-		/// how far out waves will reach past their base length
+		/// how far out waves will reach past (or hang behind) their base length
 		/// clamp to no further than baseLen
 		waveOffsetMin := math.Floor(float64(float32(baseLength) * shared.Config.Randomness))
 
@@ -114,9 +115,9 @@ func Wave(interval []types.PixelWithMask) {
 
 ///
 
-///
+/// util
 
-// util
+// inclusive
 func randBetween(max int, min_opt ...int) int {
 	min := 0
 	if len(min_opt) > 0 {
@@ -134,13 +135,12 @@ func commonSort(stretches []types.PixelStretch, interval []types.PixelWithMask) 
 		stretch := stretches[stretchIdx]
 		/// grab the pixels we want
 		pixels := interval[stretch.Start:stretch.End]
-		jInit := len(pixels) - 1
 		comparator := comparators.ComparatorFunctionMappings[shared.Config.Comparator]
 		slices.SortStableFunc(pixels, comparator)
 
 		if shared.Config.Reverse {
 			/// do a flip!
-			for i, j := 0, jInit; i < j; i, j = i+1, j-1 {
+			for i, j := 0, (len(pixels) - 1); i < j; i, j = i+1, j-1 {
 				pixels[i], pixels[j] = pixels[j], pixels[i]
 			}
 		}
@@ -148,6 +148,7 @@ func commonSort(stretches []types.PixelStretch, interval []types.PixelWithMask) 
 }
 
 // select all pixels not masked off
+// FIXME: doesn't properly skip nil pixels, leaves empty intervals
 func getUnmaskedStretches(interval []types.PixelWithMask) []types.PixelStretch {
 	stretches := make([]types.PixelStretch, 0)
 	baseIdx := 0
@@ -160,13 +161,18 @@ func getUnmaskedStretches(interval []types.PixelWithMask) []types.PixelStretch {
 			/// look ahead for the end of the mask
 			endMaskIdx := j
 			for {
-				if endMaskIdx >= intervalLen {
-					break
-				}
-				if interval[endMaskIdx].Mask != 255 || !(pixel.R == 0 && pixel.G == 0 && pixel.B == 0 && pixel.A == 0) {
-					break
-				}
+				/// increment furst: we wanna look at the next pixel
 				endMaskIdx++
+				/// off the edge
+				if endMaskIdx == intervalLen {
+					break
+				}
+				nextPixel := interval[endMaskIdx]
+				/// if its not masked or nil, exit
+				/// this is the start for the next stretch
+				if nextPixel.Mask != 255 && !(nextPixel.R == 0 && nextPixel.G == 0 && nextPixel.B == 0 && nextPixel.A == 0) {
+					break
+				}
 			}
 
 			stretch := types.PixelStretch{Start: baseIdx, End: j}

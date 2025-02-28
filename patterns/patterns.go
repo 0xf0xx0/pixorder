@@ -8,14 +8,15 @@ import (
 
 	"pixelsort_go/types"
 )
-
+// spits out seams to be sorted
 var Loader = map[string]func(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any){
 	/// theres a better way, right? please tell me im dumb
 	"rowload":    LoadRow,
 	"spiralload": LoadSpiral,
 	"seamload":   LoadSeamCarving,
 }
-var Saver = map[string]func(outputImg *image.RGBA, rows *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA{
+// puts sorted seams back in the right place
+var Saver = map[string]func(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA{
 	"rowsave":    SaveRow,
 	"spiralsave": SaveSpiral,
 	"seamsave":   SaveSeamCarving,
@@ -31,20 +32,16 @@ func LoadRow(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) 
 		for x := 0; x < dims.X; x++ {
 			pixel := img.RGBAAt(x, y)
 			masked := mask.GrayAt(x, y).Y
-			wrapped := types.PixelWithMask{R: pixel.R, G: pixel.G, B: pixel.B, A: pixel.A, Mask: masked}
-			row[x] = wrapped
+			row[x] = types.PixelWithMask{R: pixel.R, G: pixel.G, B: pixel.B, A: pixel.A, Mask: masked}
 		}
 		rows[y] = row
 	}
 	return &rows, nil
 }
 func SaveRow(outputImg *image.RGBA, rows *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) *image.RGBA {
-	for i := 0; i < len(*rows); i++ {
-		row := (*rows)[i]
-		for j := 0; j < len(row); j++ {
-			currPixWithMask := row[j]
-			pixel := color.RGBA{currPixWithMask.R, currPixWithMask.G, currPixWithMask.B, currPixWithMask.A}
-			outputImg.SetRGBA(j, i, pixel)
+	for i, row := range *rows {
+		for j, currPixWithMask := range row {
+			outputImg.SetRGBA(j, i, currPixWithMask.ToColor())
 		}
 	}
 	return outputImg
@@ -53,6 +50,7 @@ func SaveRow(outputImg *image.RGBA, rows *[][]types.PixelWithMask, dims image.Re
 // / based on https://github.com/jeffThompson/PixelSorting/blob/master/SpiralSortPixels/SpiralSortPixels.pde
 // / prayge, i'm not a mathy fomx
 // / lots of help from fren fixing it
+// / the code is under cc-by-nc-sa 3.0 ig? https://creativecommons.org/licenses/by-nc-sa/3.0/
 func LoadSpiral(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds().Max
 	width := dims.X
@@ -136,7 +134,7 @@ func SaveSpiral(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims imag
 	return outputImg
 }
 // https://github.com/jeffThompson/PixelSorting/tree/master/SortThroughSeamCarving/SortThroughSeamCarving
-// comments copied over
+// "//" comments copied over
 func LoadSeamCarving(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds()
 
@@ -145,9 +143,9 @@ func LoadSeamCarving(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMas
 	draw.Draw(grayed, grayed.Bounds(), img.SubImage(dims), dims.Min, draw.Src)
 
 	// run kernels to create "energy map"
-	runKernels(*grayed)
+	runKernels(grayed)
 	// sum pathways through the image
-	sums := getSums(*grayed, grayed.Rect.Max)
+	sums := getSums(grayed, grayed.Rect.Max)
 
 	width := img.Rect.Dx()
 	height := img.Rect.Dy()
@@ -189,9 +187,6 @@ func SaveSeamCarving(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims
 	byteCount := len(outputImg.Pix)
 
 	for bi, seam := range (*seams) {
-		// if bi > 3 && bi < len(*seams) - 3 {
-		// 	continue
-		// }
 		seamLen := len(seam)
 		/// write out
 		for i := 0; i < seamLen; i++ {
@@ -209,18 +204,18 @@ func SaveSeamCarving(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims
 	}
 	return outputImg
 }
-func unrollImage(img image.Image) []color.Gray {
+func unrollImage(img *image.Gray) []color.Gray {
 	dims := img.Bounds().Max
 	pixels := make([]color.Gray, dims.X*dims.Y)
 	for y := 0; y < dims.Y; y++ {
 		for x := 0; x < dims.X; x++ {
-			pixel := img.At(x, y)
-			pixels[y*dims.X+x] = pixel.(color.Gray)
+			pixel := img.GrayAt(x, y)
+			pixels[y*dims.X+x] = pixel
 		}
 	}
 	return pixels
 }
-func runKernels(img image.Gray) {
+func runKernels(img *image.Gray) {
 	/// kernels are black magic
 	vertKernel := [][]int8{
 		{-1, 0, 1},
@@ -234,11 +229,11 @@ func runKernels(img image.Gray) {
 	}
 
 	/// split image
-	vImg := unrollImage(&img)
-	hImg := unrollImage(&img)
+	vImg := unrollImage(img)
+	hImg := unrollImage(img)
 
 	/// edge detect
-	dims := img.Bounds()
+	dims := (*img).Bounds()
 	width := dims.Max.X
 	height := dims.Max.Y
 	totalLen := width * height
@@ -249,7 +244,7 @@ func runKernels(img image.Gray) {
 			for ky := -1; ky <= 1; ky++ {
 				for kx := -1; kx <= 1; kx++ {
 					pos := min((y+ky)*width+(x+kx), totalLen-1)
-					val := img.Pix[pos]
+					val := (*img).Pix[pos]
 					sum += int(horizKernel[ky+1][kx+1]) * int(val)
 				}
 			}
@@ -280,7 +275,7 @@ func runKernels(img image.Gray) {
 		}
 	}
 }
-func getSums(img image.Gray, dims image.Point) [][]float32 {
+func getSums(img *image.Gray, dims image.Point) [][]float32 {
 	width := dims.X
 	height := dims.Y
 	sums := make([][]float32, height)
@@ -289,7 +284,7 @@ func getSums(img image.Gray, dims image.Point) [][]float32 {
 		sums[i] = sumRows[i*width : (i+1)*width]
 	}
 
-	// read furst row
+	/// read furst row
 	for x := 0; x < width; x++ {
 		sums[0][x] = float32(img.Pix[x])
 	}
