@@ -17,7 +17,7 @@ func TestArdenLoadSpiral(t *testing.T) {
 	WIDTH := 3
 	HEIGHT := 3
 	input := image.NewRGBA(image.Rect(0, 0, WIDTH, HEIGHT))
-	mask := image.NewRGBA(image.Rect(0, 0, WIDTH, HEIGHT))
+	mask := image.NewGray(image.Rect(0, 0, WIDTH, HEIGHT))
 	// Fill input with random pixels
 	n, err := rand.Read(input.Pix)
 	if n != WIDTH*HEIGHT*4 {
@@ -54,7 +54,7 @@ func TestArdenLoadSpiral(t *testing.T) {
 	}
 
 	/// compare input and output (should be equal)
-	res := patterns.SaveSpiral(actual, input.Rect)
+	res := patterns.SaveSpiral(image.NewRGBA(image.Rect(0, 0, WIDTH, HEIGHT)), actual, input.Rect)
 	for y := 0; y < HEIGHT; y++ {
 		for x := 0; x < WIDTH; x++ {
 			inPix := input.At(x, y)

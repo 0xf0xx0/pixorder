@@ -204,6 +204,15 @@ func SaveSeamCarving(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims
 	}
 	return outputImg
 }
+
+/// TODO
+/// [ ] load json array of curves (made up of points)
+/// [ ] plot curves on img and select pixels
+// func LoadBezier(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any)
+/// TODO
+/// [ ] plot curves on img and place pixels
+// func SaveBezier(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA
+/// seam carving util func
 func unrollImage(img *image.Gray) []color.Gray {
 	dims := img.Bounds().Max
 	pixels := make([]color.Gray, dims.X*dims.Y)

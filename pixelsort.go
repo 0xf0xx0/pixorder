@@ -164,7 +164,7 @@ func main() {
 			&cli.BoolFlag{
 				Name:  "profile",
 				Value: false,
-				Usage: "use pprof to cpu profile the program and spit out a .prof",
+				Usage: "use pprof to spit out a cpu profile",
 			},
 		},
 		Action: func(ctx *cli.Context) error {
