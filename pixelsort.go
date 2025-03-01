@@ -368,7 +368,7 @@ func sortingTime(input, output, maskpath string) error {
 		}
 
 		/// RO TA TE (again)
-		if math.Mod(shared.Config.Angle, 180) != 0 {
+		if math.Mod(shared.Config.Angle, 360) != 0 {
 			rawMask = imaging.Rotate(rawMask, float64(shared.Config.Angle), color.Transparent)
 		}
 
