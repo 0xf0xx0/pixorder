@@ -98,7 +98,6 @@ func LoadSpiral(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, an
 	return &seams, nil
 }
 func SaveSpiral(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims image.Rectangle, _ ...any) *image.RGBA {
-
 	width := dims.Max.X
 	height := dims.Max.Y
 
@@ -208,7 +207,16 @@ func SaveSeamCarving(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims
 /// TODO
 /// [ ] load json array of curves (made up of points)
 /// [ ] plot curves on img and select pixels
-// func LoadBezier(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any)
+// func LoadBezier(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
+// 	type point struct {
+// 		x,y int
+// 	}
+// 	type bezier struct {
+// 		points []point
+// 		width int
+// 	}
+
+// }
 /// TODO
 /// [ ] plot curves on img and place pixels
 // func SaveBezier(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA

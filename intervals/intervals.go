@@ -10,8 +10,9 @@ import (
 	"pixelsort_go/types"
 )
 
+/// seam building functions + some alt "sorts"
 /// an interval/seam is a full slice of pixels from shared.Config.Pattern
-/// a stretch is a section of an interval
+/// a stretch is a section of a seam
 /// types.PixelStretch is the "skeleton" stretch
 /// i should get this straightened out
 
@@ -24,51 +25,49 @@ var IntervalFunctionMappings = map[string]func([]types.PixelWithMask){
 	"wave":    Wave,
 }
 
-func Sort(section []types.PixelWithMask) {
-	sorter := IntervalFunctionMappings[shared.Config.Interval]
-	stretches := getUnmaskedStretches(section)
-	for i := 0; i < len(stretches); i++ {
-		stretch := stretches[i]
-		sorter(section[stretch.Start:stretch.End])
-	}
-}
-
 // sorters
 
-func Shuffle(interval []types.PixelWithMask) {
+func Sort(seam []types.PixelWithMask) {
+	sorter := IntervalFunctionMappings[shared.Config.Interval]
+	stretches := getUnmaskedStretches(seam)
+	for i := 0; i < len(stretches); i++ {
+		stretch := stretches[i]
+		sorter(seam[stretch.Start:stretch.End])
+	}
+}
+func Shuffle(seam []types.PixelWithMask) {
 	/// we want shuffling to respect thresholds/masks too, so
 	/// use the result to determine whether to skip or not
 	comparator := comparators.ComparatorFunctionMappings[shared.Config.Comparator]
-	mathRand.Shuffle(len(interval), func(i, j int) {
-		skip := comparator(interval[i], interval[j])
+	mathRand.Shuffle(len(seam), func(i, j int) {
+		skip := comparator(seam[i], seam[j])
 		if skip != 0 {
-			interval[i], interval[j] = interval[j], interval[i]
+			seam[i], seam[j] = seam[j], seam[i]
 		}
 	})
 }
-
-// copy the furst pixel across the rest of the interval
-func Smear(interval []types.PixelWithMask) {
-	intervalLength := len(interval)
+// copy the furst pixel across the rest of the seam
+func Smear(seam []types.PixelWithMask) {
+	intervalLength := len(seam)
 	if intervalLength == 0 {
 		return
 	}
-	smearedPixel := interval[0]
+	smearedPixel := seam[0]
 
-	for idx := range interval {
-		interval[idx] = smearedPixel
+	for idx := range seam {
+		seam[idx] = smearedPixel
 	}
 }
 
-// noop
-func None(interval []types.PixelWithMask) {
-	commonSort([]types.PixelStretch{{Start: 0, End: len(interval)}}, interval)
+// noop, returns a single stretch containing the full seam
+func None(seam []types.PixelWithMask) {
+	commonSort([]types.PixelStretch{{Start: 0, End: len(seam)}}, seam)
 }
 
 // takes a randomly-sized chunk of the remaining pixels and sorts them
-func Random(interval []types.PixelWithMask) {
+func Random(seam []types.PixelWithMask) {
 	stretches := make([]types.PixelStretch, 0)
-	intervalLength := len(interval)
+	intervalLength := len(seam)
 
 	j := 0
 	for {
@@ -83,14 +82,14 @@ func Random(interval []types.PixelWithMask) {
 		j += randLength
 	}
 
-	commonSort(stretches, interval)
+	commonSort(stretches, seam)
 }
 
 // sorts in "waves" across the interval
 // not very useful with complex masks
-func Wave(interval []types.PixelWithMask) {
+func Wave(seam []types.PixelWithMask) {
 	stretches := make([]types.PixelStretch, 0)
-	intervalLength := len(interval)
+	intervalLength := len(seam)
 	baseLength := shared.Config.SectionLength
 
 	j := 0
@@ -110,7 +109,7 @@ func Wave(interval []types.PixelWithMask) {
 		stretches = append(stretches, types.PixelStretch{Start: j, End: endIdx})
 		j += waveLength
 	}
-	commonSort(stretches, interval)
+	commonSort(stretches, seam)
 }
 
 ///
@@ -130,11 +129,11 @@ func randBetween(max int, min_opt ...int) int {
 	return int(math.Floor(randNum * float64((+max)+1)))
 }
 
-func commonSort(stretches []types.PixelStretch, interval []types.PixelWithMask) {
+func commonSort(stretches []types.PixelStretch, seam []types.PixelWithMask) {
 	for stretchIdx := 0; stretchIdx < len(stretches); stretchIdx++ {
 		stretch := stretches[stretchIdx]
 		/// grab the pixels we want
-		pixels := interval[stretch.Start:stretch.End]
+		pixels := seam[stretch.Start:stretch.End]
 		comparator := comparators.ComparatorFunctionMappings[shared.Config.Comparator]
 		slices.SortStableFunc(pixels, comparator)
 
@@ -148,14 +147,13 @@ func commonSort(stretches []types.PixelStretch, interval []types.PixelWithMask) 
 }
 
 // select all pixels not masked off
-// FIXME: doesn't properly skip nil pixels, leaves empty intervals
-func getUnmaskedStretches(interval []types.PixelWithMask) []types.PixelStretch {
+func getUnmaskedStretches(seam []types.PixelWithMask) []types.PixelStretch {
 	stretches := make([]types.PixelStretch, 0)
 	baseIdx := 0
-	intervalLen := len(interval)
+	intervalLen := len(seam)
 
 	for j := 0; j < intervalLen; j++ {
-		pixel := interval[j]
+		pixel := seam[j]
 		/// if masked off, or nil
 		if pixel.Mask == 255 || (pixel.R == 0 && pixel.G == 0 && pixel.B == 0 && pixel.A == 0) {
 			/// look ahead for the end of the mask
@@ -167,9 +165,9 @@ func getUnmaskedStretches(interval []types.PixelWithMask) []types.PixelStretch {
 				if endMaskIdx == intervalLen {
 					break
 				}
-				nextPixel := interval[endMaskIdx]
+				nextPixel := seam[endMaskIdx]
 				/// if its not masked or nil, exit
-				/// this is the start for the next stretch
+				/// this is the start index of the next stretch
 				if nextPixel.Mask != 255 && !(nextPixel.R == 0 && nextPixel.G == 0 && nextPixel.B == 0 && nextPixel.A == 0) {
 					break
 				}
