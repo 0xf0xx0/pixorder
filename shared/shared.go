@@ -21,6 +21,5 @@ var Config struct {
 	// pixels outside of these arent sorted
 	Thresholds types.ThresholdConfig
 	// rotate image
-
 	Angle float64
 }

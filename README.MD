@@ -22,12 +22,11 @@ furst time using go, might be cursed
 ## install
 ### from source
 ```sh
-git clone https://github.com/0xf0xx0/pixelsort-go.git
-cd pixelsort-go
+git clone https://github.com/0xf0xx0/pixorder.git
+cd pixorder
 go build
-# now mv the binary, or
+# now `mv pixorder`, or
 go install
-# to install to your GOBIN/GOPATH
 ```
 
 ## examples/usage
