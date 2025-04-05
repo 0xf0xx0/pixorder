@@ -67,22 +67,10 @@ go install
 did you know webb and hubble pics are cc4?
 
 ## "benchmark"
-"elapsed" is time spent actually sorting  \
-src img is the "large jpg" dl from [esawebb.org](https://esawebb.org/images/potm2310a/)
-```
-=> time pixelsort_go -i ~/Downloads/potm2310a.jpg -o ./benchmark
-Sorting 1 images with a config of {Pattern:row Interval:row Comparator:lightness SectionLength:69 Randomness:1 Reverse:false Thresholds:{Lower:0 Upper:1} Angle:0}.
-Loading image 1 (/home/________/Downloads/potm2310a.jpg -> ./benchmark)...
-Sorting /home/________/Downloads/potm2310a.jpg...
-./benchmark elapsed: 2.112s
-Writing ./benchmark...
-0:02.78 real 2.72 usermode 99% 85124 Kb mem
-
-=> time pixelsort_go -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark
-Sorting 1 images with a config of {Pattern:row Interval:row Comparator:lightness SectionLength:69 Randomness:1 Reverse:false Thresholds:{Lower:0 Upper:1} Angle:0}.
-Loading image 1 (/home/________/Downloads/potm2310a.jpg -> ./benchmark)...
-Sorting /home/________/Downloads/potm2310a.jpg...
-./benchmark elapsed: 1.287s
-Writing ./benchmark...
-0:02.11 real 2.05 usermode 99% 89884 Kb mem
-```
+done with [hyperfine](https://github.com/sharkdp/hyperfine), so it's super legit now right? \
+src img is the "large jpg" dl from [esawebb.org](https://esawebb.org/images/potm2310a/) \
+`hyperfine -w 3 -c "rm -v ./benchmark" "pixelsort_go -i ~/Downloads/potm2310a.jpg -o ./benchmark" "pixelsort_go -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark" --export-markdown -`
+| Command | Mean [s] | Min [s] | Max [s] | Relative |
+|:---|---:|---:|---:|---:|
+| `pixelsort_go -i ~/Downloads/potm2310a.jpg -o ./benchmark` | 2.716 ± 0.013 | 2.690 | 2.734 | 1.31 ± 0.02 |
+| `pixelsort_go -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark` | 2.074 ± 0.032 | 2.032 | 2.126 | 1.00 |
