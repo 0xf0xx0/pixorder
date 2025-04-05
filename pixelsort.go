@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"pixelsort_go/comparators"
-	"pixelsort_go/intervals"
-	"pixelsort_go/patterns"
-	"pixelsort_go/shared"
+	"pixorder/comparators"
+	"pixorder/intervals"
+	"pixorder/patterns"
+	"pixorder/shared"
 
 	"github.com/kovidgoyal/imaging"
 	"github.com/remeh/sizedwaitgroup"
@@ -43,11 +43,11 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name:                   "pixelsort_go",
+		Name:                   "pixorder",
 		Usage:                  "Organize pixels.",
 		Version:                "0.8.0",
 		UseShortOptionHandling: true,
-		EnableBashCompletion: true,
+		EnableBashCompletion:   true,
 		Flags: []cli.Flag{
 			&cli.StringSliceFlag{
 				Name:     "input",
@@ -391,7 +391,7 @@ func sortingTime(input, output, maskpath string) error {
 	println(fmt.Sprintf("Sorting %s...", input))
 	/// pass the rows to the sorter
 	start := time.Now()
-	for _, seam := range *seams  {
+	for _, seam := range *seams {
 		intervals.Sort(seam)
 	}
 	end := time.Now()

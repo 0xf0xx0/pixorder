@@ -6,7 +6,7 @@ import (
 	"image/draw"
 	"math"
 
-	"pixelsort_go/types"
+	"pixorder/types"
 )
 // spits out seams to be sorted
 //

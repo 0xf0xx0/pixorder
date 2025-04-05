@@ -1,8 +1,8 @@
 package comparators
 
 import (
-	"pixelsort_go/shared"
-	"pixelsort_go/types"
+	"pixorder/shared"
+	"pixorder/types"
 )
 
 var ComparatorFunctionMappings = map[string]types.ComparatorFunc{

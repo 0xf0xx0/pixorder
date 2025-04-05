@@ -1,4 +1,4 @@
-# pixelsort_go
+# pixorder
 pixelsorter cli written in golang
 
 rewritten from my nodejs implementation, which used [satyarth/pixelsort](https://github.com/satyarth/pixelsort/) as reference
@@ -38,31 +38,31 @@ go install
 ![b&w mask](./examples/webb-mask.jpg)
 
 **Row sort w/ default options**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --output ./examples/webb-row.jpg`
+`pixorder --input ~/Downloads/potm2310a.jpg --output ./examples/webb-row.jpg`
 ![row sort](./examples/webb-row.jpg)
 
 **Row sort w/ threshold**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --lower_threshold 0.3 --upper_threshold 0.6 --output ./examples/webb-row-thresh.jpg`
+`pixorder --input ~/Downloads/potm2310a.jpg --lower_threshold 0.3 --upper_threshold 0.6 --output ./examples/webb-row-thresh.jpg`
 ![row sort](./examples/webb-row-thresh.jpg)
 
 **Row sort w/ default options & mask**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --output ./examples/webb-row-masked.jpg`
+`pixorder --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --output ./examples/webb-row-masked.jpg`
 ![masked row sort](./examples/webb-row-masked.jpg)
 
 **Spiral sort w/ default options**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --pattern spiral --output ./examples/webb-spiral.jpg`
+`pixorder --input ~/Downloads/potm2310a.jpg --pattern spiral --output ./examples/webb-spiral.jpg`
 ![spiral sort](./examples/webb-spiral.jpg)
 
 **Spiral sort using most options & mask**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern spiral --interval wave --randomness 0.4 --comparator saturation --section_length 400 --output ./examples/webb-spiral-masked.jpg`
+`pixorder --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern spiral --interval wave --randomness 0.4 --comparator saturation --section_length 400 --output ./examples/webb-spiral-masked.jpg`
 ![masked spiral sort](./examples/webb-spiral-masked.jpg)
 
 **Seam sort w/ default options**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --pattern seam --output ./examples/webb-seam.jpg`
+`pixorder --input ~/Downloads/potm2310a.jpg --pattern seam --output ./examples/webb-seam.jpg`
 ![seam sort](./examples/webb-seam.jpg)
 
 **Seam sort w/ default options & mask**
-`pixelsort_go --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern seam --output ./examples/webb-seam-masked.jpg`
+`pixorder --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --pattern seam --output ./examples/webb-seam-masked.jpg`
 ![masked seam sort](./examples/webb-seam-masked.jpg)
 
 did you know webb and hubble pics are cc4?
@@ -70,8 +70,8 @@ did you know webb and hubble pics are cc4?
 ## "benchmark"
 done with [hyperfine](https://github.com/sharkdp/hyperfine), so it's super legit now right? \
 src img is the "large jpg" dl from [esawebb.org](https://esawebb.org/images/potm2310a/) \
-`hyperfine -w 3 -c "rm -v ./benchmark" "pixelsort_go -i ~/Downloads/potm2310a.jpg -o ./benchmark" "pixelsort_go -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark" --export-markdown -`
+`hyperfine -w 3 -c "rm -v ./benchmark" "pixorder -i ~/Downloads/potm2310a.jpg -o ./benchmark" "pixorder -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark" --export-markdown -`
 | Command | Mean [s] | Min [s] | Max [s] | Relative |
 |:---|---:|---:|---:|---:|
-| `pixelsort_go -i ~/Downloads/potm2310a.jpg -o ./benchmark` | 2.716 ± 0.013 | 2.690 | 2.734 | 1.31 ± 0.02 |
-| `pixelsort_go -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark` | 2.074 ± 0.032 | 2.032 | 2.126 | 1.00 |
+| `pixorder -i ~/Downloads/potm2310a.jpg -o ./benchmark` | 2.716 ± 0.013 | 2.690 | 2.734 | 1.31 ± 0.02 |
+| `pixorder -i ~/Downloads/potm2310a.jpg -m ./examples/webb-mask.jpg -o ./benchmark` | 2.074 ± 0.032 | 2.032 | 2.126 | 1.00 |

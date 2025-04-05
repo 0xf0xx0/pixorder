@@ -1,4 +1,4 @@
-module pixelsort_go
+module pixorder
 
 go 1.21.1
 

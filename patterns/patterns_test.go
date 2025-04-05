@@ -8,8 +8,8 @@ import (
 
 	"image"
 	"image/color"
-	"pixelsort_go/patterns"
-	// "pixelsort_go/types"
+	"pixorder/patterns"
+	// "pixorder/types"
 )
 
 func TestArdenLoadSpiral(t *testing.T) {
