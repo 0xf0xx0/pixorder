@@ -16,6 +16,7 @@ furst time using go, might be cursed
 
 ## wanted features
 - even more patterns
+  - https://github.com/satyarth/pixelsort/issues/30
 - completion? im lazy
 
 ## install

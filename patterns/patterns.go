@@ -9,8 +9,9 @@ import (
 	"pixelsort_go/types"
 )
 // spits out seams to be sorted
+//
+// second return value is arbitrary data persisted between *load and *save
 var Loader = map[string]func(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any){
-	/// theres a better way, right? please tell me im dumb
 	"rowload":    LoadRow,
 	"spiralload": LoadSpiral,
 	"seamload":   LoadSeamCarving,
@@ -21,7 +22,7 @@ var Saver = map[string]func(outputImg *image.RGBA, seams *[][]types.PixelWithMas
 	"spiralsave": SaveSpiral,
 	"seamsave":   SaveSeamCarving,
 }
-
+// loads entire rows
 func LoadRow(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds().Max
 	/// split image into rows
@@ -32,7 +33,7 @@ func LoadRow(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) 
 		for x := 0; x < dims.X; x++ {
 			pixel := img.RGBAAt(x, y)
 			masked := mask.GrayAt(x, y).Y
-			row[x] = types.PixelWithMask{R: pixel.R, G: pixel.G, B: pixel.B, A: pixel.A, Mask: masked}
+			row[x] = types.PixelWithMaskFromColor(pixel, masked)
 		}
 		rows[y] = row
 	}
@@ -47,10 +48,11 @@ func SaveRow(outputImg *image.RGBA, rows *[][]types.PixelWithMask, dims image.Re
 	return outputImg
 }
 
-// / based on https://github.com/jeffThompson/PixelSorting/blob/master/SpiralSortPixels/SpiralSortPixels.pde
-// / prayge, i'm not a mathy fomx
-// / lots of help from fren fixing it
-// / the code is under cc-by-nc-sa 3.0 ig? https://creativecommons.org/licenses/by-nc-sa/3.0/
+// based on https://github.com/jeffThompson/PixelSorting/blob/master/SpiralSortPixels/SpiralSortPixels.pde
+// prayge, i'm not a mathy fomx
+// lots of help from fren fixing it
+// the code is under cc-by-nc-sa 3.0 ig? https://creativecommons.org/licenses/by-nc-sa/3.0/
+// loads in a t-r-b-l spiral
 func LoadSpiral(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
 	dims := img.Bounds().Max
 	width := dims.X
@@ -132,9 +134,10 @@ func SaveSpiral(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims imag
 
 	return outputImg
 }
+// finds the strongest path and loads using it
 // https://github.com/jeffThompson/PixelSorting/tree/master/SortThroughSeamCarving/SortThroughSeamCarving
-// "//" comments copied over
 func LoadSeamCarving(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
+	/// "//" comments copied over
 	dims := img.Bounds()
 
 	/// grayscale
@@ -204,23 +207,7 @@ func SaveSeamCarving(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims
 	return outputImg
 }
 
-/// TODO
-/// [ ] load json array of curves (made up of points)
-/// [ ] plot curves on img and select pixels
-// func LoadBezier(img *image.RGBA, mask *image.Gray) (*[][]types.PixelWithMask, any) {
-// 	type point struct {
-// 		x,y int
-// 	}
-// 	type bezier struct {
-// 		points []point
-// 		width int
-// 	}
-
-// }
-/// TODO
-/// [ ] plot curves on img and place pixels
-// func SaveBezier(outputImg *image.RGBA, seams *[][]types.PixelWithMask, dims image.Rectangle, data ...any) *image.RGBA
-/// seam carving util func
+// seam carving util func
 func unrollImage(img *image.Gray) []color.Gray {
 	dims := img.Bounds().Max
 	pixels := make([]color.Gray, dims.X*dims.Y)
