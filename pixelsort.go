@@ -10,6 +10,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"runtime/pprof"
 	"slices"
 	"strings"
@@ -279,7 +280,7 @@ func main() {
 					fileSuffix := splitFileName[len(splitFileName)-1]
 
 					if inputLen > 1 {
-						out = fmt.Sprintf("frame%04d.%s", i, fileSuffix)
+						out = filepath.Join(output, fmt.Sprintf("frame%04d.%s", i, fileSuffix))
 					} else if out == "" {
 						out = fmt.Sprintf("%s.%s", "sorted", fileSuffix)
 					}

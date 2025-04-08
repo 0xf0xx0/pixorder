@@ -1,4 +1,6 @@
 # pixorder
+![masked row sort](./examples/webb-row-masked.jpg)
+
 pixelsorter cli written in golang
 
 rewritten from my nodejs implementation, which used [satyarth/pixelsort](https://github.com/satyarth/pixelsort/) as reference
@@ -10,7 +12,7 @@ furst time using go, might be cursed
 - shuffle pixels, sort in waves, random lengths, or smear instead
 - sort by lightness, hue, saturation, and r/g/b
 - sort with a mask
-- sort images in parallel
+- sort multiple images in parallel
 - sort in reverse
 - rotation
 
@@ -42,7 +44,7 @@ go install
 
 **Row sort w/ threshold**
 `pixorder --input ~/Downloads/potm2310a.jpg --lower_threshold 0.3 --upper_threshold 0.6 --output ./examples/webb-row-thresh.jpg`
-![row sort](./examples/webb-row-thresh.jpg)
+![row sort w/ threshold](./examples/webb-row-thresh.jpg)
 
 **Row sort w/ default options & mask**
 `pixorder --input ~/Downloads/potm2310a.jpg --mask ./examples/webb-mask.jpg --output ./examples/webb-row-masked.jpg`

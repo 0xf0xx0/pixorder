@@ -1,6 +1,6 @@
 module pixorder
 
-go 1.21.1
+go 1.22
 
 require (
 	github.com/kovidgoyal/imaging v1.6.4
