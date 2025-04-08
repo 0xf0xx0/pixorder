@@ -49,9 +49,9 @@ func main() {
 		Name:                   "pixorder",
 		Usage:                  "Organize pixels.",
 		UsageText:              "string",
-		Version:                "0.8.0",
+		Version:                "0.9.0",
 		UseShortOptionHandling: true,
-		EnableShellCompletion:   true,
+		EnableShellCompletion:  true,
 		Flags: []cli.Flag{
 			&cli.StringSliceFlag{
 				Name:     "input",
