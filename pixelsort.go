@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"image"
 	"image/color"
@@ -24,7 +25,7 @@ import (
 
 	"github.com/kovidgoyal/imaging"
 	"github.com/remeh/sizedwaitgroup"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func main() {
@@ -44,13 +45,13 @@ func main() {
 		validComparators = append(validComparators, k)
 	}
 
-	app := &cli.App{
+	app := &cli.Command{
 		Name:                   "pixorder",
 		Usage:                  "Organize pixels.",
 		UsageText:              "string",
 		Version:                "0.8.0",
 		UseShortOptionHandling: true,
-		EnableBashCompletion:   true,
+		EnableShellCompletion:   true,
 		Flags: []cli.Flag{
 			&cli.StringSliceFlag{
 				Name:     "input",
@@ -68,7 +69,7 @@ func main() {
 				Aliases: []string{"p"},
 				Usage:   fmt.Sprintf("`pattern` loader to use [%s]", strings.Join(validPatterns, ", ")),
 				Value:   "row",
-				Action: func(ctx *cli.Context, v string) error {
+				Action: func(_ context.Context, _ *cli.Command, v string) error {
 					if !slices.Contains(validPatterns, v) {
 						return fmt.Errorf("invalid interval \"%s\" [%s]", v, strings.Join(validPatterns, ", "))
 					}
@@ -80,7 +81,7 @@ func main() {
 				Value:   "none",
 				Aliases: []string{"I"},
 				Usage:   fmt.Sprintf("interval `func`tion to use [%s]", strings.Join(validIntervals, ", ")),
-				Action: func(ctx *cli.Context, v string) error {
+				Action: func(_ context.Context, _ *cli.Command, v string) error {
 					if !slices.Contains(validIntervals, v) {
 						return fmt.Errorf("invalid interval \"%s\" [%s]", v, strings.Join(validIntervals, ", "))
 					}
@@ -92,7 +93,7 @@ func main() {
 				Value:   "lightness",
 				Aliases: []string{"c"},
 				Usage:   fmt.Sprintf("pixel comparison `func`tion to use [%s]", strings.Join(validComparators, ", ")),
-				Action: func(ctx *cli.Context, v string) error {
+				Action: func(_ context.Context, _ *cli.Command, v string) error {
 					if !slices.Contains(validComparators, v) {
 						return fmt.Errorf("invalid comparator \"%s\" [%s]", v, strings.Join(validComparators, ", "))
 					}
@@ -104,31 +105,31 @@ func main() {
 				Aliases: []string{"m"},
 				Usage:   "b&w `mask` to determine which pixels to touch; white is skipped",
 			},
-			&cli.Float64Flag{
+			&cli.FloatFlag{
 				Name:    "lower_threshold",
 				Value:   0.0,
 				Aliases: []string{"l"},
 				Usage:   "pixels below this `thresh`old won't be sorted",
-				Action: func(ctx *cli.Context, v float64) error {
+				Action: func(_ context.Context, _ *cli.Command, v float64) error {
 					if v < 0.0 || v > 1.0 {
 						return fmt.Errorf("lower_threshold is outside of range [0.0-1.0]")
 					}
 					return nil
 				},
 			},
-			&cli.Float64Flag{
+			&cli.FloatFlag{
 				Name:    "upper_threshold",
 				Value:   1.0,
 				Aliases: []string{"u"},
 				Usage:   "pixels above this `thresh`old won't be sorted",
-				Action: func(ctx *cli.Context, v float64) error {
+				Action: func(_ context.Context, _ *cli.Command, v float64) error {
 					if v < 0.0 || v > 1.0 {
 						return fmt.Errorf("upper_threshold is outside of range [0.0-1.0]")
 					}
 					return nil
 				},
 			},
-			&cli.Float64Flag{
+			&cli.FloatFlag{
 				Name:    "angle",
 				Value:   0.0,
 				Aliases: []string{"a"},
@@ -146,12 +147,12 @@ func main() {
 				Aliases: []string{"r"},
 				Usage:   "reverse the sort direction",
 			},
-			&cli.Float64Flag{
+			&cli.FloatFlag{
 				Name:    "randomness",
 				Value:   1,
 				Aliases: []string{"R"},
 				Usage:   "used to determine the percentage of [row]s to skip and how wild [wave] edges should be, among other things",
-				Action: func(ctx *cli.Context, v float64) error {
+				Action: func(_ context.Context, _ *cli.Command, v float64) error {
 					if v < 0.0 || v > 1.0 {
 						return fmt.Errorf("randomness is outside of range [0.0-1.0]")
 					}
@@ -170,7 +171,7 @@ func main() {
 				Usage: "use pprof to spit out a cpu profile",
 			},
 		},
-		Action: func(ctx *cli.Context) error {
+		Action: func(_ context.Context, ctx *cli.Command) error {
 			inputs := ctx.StringSlice("input")
 			output := ctx.String("output")
 			mask := ctx.String("mask")
@@ -178,13 +179,13 @@ func main() {
 			shared.Config.Pattern = ctx.String("pattern")
 			shared.Config.Interval = ctx.String("interval")
 			shared.Config.Comparator = ctx.String("comparator")
-			shared.Config.Thresholds.Lower = float32(ctx.Float64("lower_threshold"))
-			shared.Config.Thresholds.Upper = float32(ctx.Float64("upper_threshold"))
-			shared.Config.SectionLength = ctx.Int("section_length")
+			shared.Config.Thresholds.Lower = float32(ctx.Float("lower_threshold"))
+			shared.Config.Thresholds.Upper = float32(ctx.Float("upper_threshold"))
+			shared.Config.SectionLength = int(ctx.Int("section_length"))
 			shared.Config.Reverse = ctx.Bool("reverse")
-			shared.Config.Randomness = float32(ctx.Float64("randomness"))
-			shared.Config.Angle = ctx.Float64("angle")
-			threadCount := ctx.Int("threads")
+			shared.Config.Randomness = float32(ctx.Float("randomness"))
+			shared.Config.Angle = ctx.Float("angle")
+			threadCount := int(ctx.Int("threads"))
 
 			/// profiling
 			if ctx.Bool("profile") {
@@ -302,7 +303,8 @@ func main() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
+	// .TODO() cause we dont need it
+	if err := app.Run(context.TODO(), os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
