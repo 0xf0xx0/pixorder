@@ -10,6 +10,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime/pprof"
 	"slices"
@@ -46,6 +47,7 @@ func main() {
 	app := &cli.App{
 		Name:                   "pixorder",
 		Usage:                  "Organize pixels.",
+		UsageText:              "string",
 		Version:                "0.8.0",
 		UseShortOptionHandling: true,
 		EnableBashCompletion:   true,
@@ -274,22 +276,24 @@ func main() {
 				go func(i int) {
 					defer wg.Done()
 
-					in := inputs[i]
-					out := output
-					splitFileName := strings.Split(inputs[0], ".")
-					fileSuffix := splitFileName[len(splitFileName)-1]
+					in := resolvePath(inputs[i])
+					out := resolvePath(output)
+					maskIdx := min(i, maskLen-1)
+					mask := masks[maskIdx]
+					fileName := filepath.Base(in)
+					fileExtension := filepath.Ext(fileName)
+					fileName = fileName[:len(fileName)-len(fileExtension)]
 
 					if inputLen > 1 {
-						out = filepath.Join(output, fmt.Sprintf("frame%04d.%s", i, fileSuffix))
+						out = filepath.Join(output, fmt.Sprintf("%s-sorted%s", fileName, fileExtension))
 					} else if out == "" {
-						out = fmt.Sprintf("%s.%s", "sorted", fileSuffix)
+						out = fmt.Sprintf("%s-sorted%s", fileName, fileExtension)
 					}
 
 					fmt.Println(fmt.Sprintf("Loading image %d (%s -> %s)...", i+1, in, out))
-					maskIdx := min(i, maskLen-1)
-					err := sortingTime(in, out, masks[maskIdx])
+					err := sortingTime(in, out, mask)
 					if err != nil {
-						cli.Exit(fmt.Sprintf("Error occured during sort of image %d (%q): %q", i+1, in, err), 1)
+						println(fmt.Errorf("Error occured during sort of image %d (%q): %q", i+1, in, err))
 					}
 				}(i)
 			}
@@ -324,10 +328,23 @@ func readdirForImages(input string) ([]string, error) {
 	return inputs, nil
 }
 
+// resolves ~ and cleans path
+// https://stackoverflow.com/a/17617721
+func resolvePath(path string) string {
+	if strings.HasPrefix(path, "~") {
+		// Use strings.HasPrefix so we don't match paths like
+		// "/something/~/something/"
+		usr, _ := user.Current()
+		home := usr.HomeDir
+		path = filepath.Join(home, path[1:])
+	}
+	return path
+}
+
 func sortingTime(input, output, maskpath string) error {
 	file, err := os.Open(input)
 	if err != nil {
-		return cli.Exit(fmt.Sprintf("Input %q could not be opened", input), 1)
+		return cli.Exit(fmt.Sprintf("Input %q could not be opened: %s", input, err), 1)
 	}
 	defer file.Close()
 
@@ -335,7 +352,7 @@ func sortingTime(input, output, maskpath string) error {
 	if err != nil {
 		println(err.Error())
 		// for some reason this error specficially doesnt display?
-		return cli.Exit(fmt.Sprintf("Input %q could not be decoded", input), 1)
+		return cli.Exit(fmt.Sprintf("Input %q could not be decoded: %s", input, err), 1)
 	}
 
 	/// RO TA TE
@@ -359,13 +376,13 @@ func sortingTime(input, output, maskpath string) error {
 	if maskpath != "" {
 		maskFile, err := os.Open(maskpath)
 		if err != nil {
-			return cli.Exit(fmt.Sprintf("Mask %q could not be opened", maskpath), 1)
+			return cli.Exit(fmt.Sprintf("Mask %q could not be opened: %s", maskpath, err), 1)
 		}
 		defer maskFile.Close()
 
 		rawMask, _, err := image.Decode(maskFile)
 		if err != nil {
-			return cli.Exit(fmt.Sprintf("Mask %q could not be decoded", maskpath), 1)
+			return cli.Exit(fmt.Sprintf("Mask %q could not be decoded: %s", maskpath, err), 1)
 		}
 
 		/// RO TA TE (again)
