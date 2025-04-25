@@ -209,20 +209,20 @@ func main() {
 
 				inputfile, err := os.Open(input)
 				if err != nil {
-					return cli.Exit(fmt.Sprintf("%s could not be opened", input), 1)
+					return cli.Exit(fmt.Sprintf("Input %q could not be opened", input), 1)
 				}
 				defer inputfile.Close()
 
 				inputStat, err := inputfile.Stat()
 				if err != nil {
-					return cli.Exit(fmt.Sprintf("Error getting %s file stats: %s", input, err), 1)
+					return cli.Exit(fmt.Sprintf("Error getting input %q file stats: %s", input, err), 1)
 				}
 				inputfile = nil
 
 				if inputStat.IsDir() {
 					res, err := readdirForImages(input)
 					if err != nil {
-						return err
+						return cli.Exit(fmt.Sprintf("Error reading input %q contents stats: %s", input, err), 1)
 					}
 					inputs = res
 					inputLen = len(inputs)
@@ -233,18 +233,18 @@ func main() {
 			if mask != "" {
 				maskfile, err := os.Open(mask)
 				if err != nil {
-					return cli.Exit(fmt.Sprintf("Mask %s could not be opened", mask), 1)
+					return cli.Exit(fmt.Sprintf("Mask %q could not be opened", mask), 1)
 				}
 				defer maskfile.Close()
 				maskStat, err := maskfile.Stat()
 				if err != nil {
-					return cli.Exit(fmt.Sprintf("Error getting mask %s file stats: %s", mask, err), 1)
+					return cli.Exit(fmt.Sprintf("Error getting mask dir file stats: %s", err), 1)
 				}
 				maskfile = nil
 				if maskStat.IsDir() {
 					res, err := readdirForImages(mask)
 					if err != nil {
-						return err
+						return cli.Exit(fmt.Sprintf("Error reading mask dir contents stats: %s", err), 1)
 					}
 					masks = res
 				} else {
@@ -303,7 +303,7 @@ func main() {
 		},
 	}
 
-	// .TODO() cause we dont need it
+	/// .TODO() cause we dont need it
 	if err := app.Run(context.TODO(), os.Args); err != nil {
 		log.Fatal(err)
 	}

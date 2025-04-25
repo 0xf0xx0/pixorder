@@ -46,16 +46,22 @@ func Shuffle(seam []types.PixelWithMask) {
 		}
 	})
 }
-// copy the furst pixel across the rest of the seam
+
+// smear pixels across the rest of the seam
 func Smear(seam []types.PixelWithMask) {
 	intervalLength := len(seam)
 	if intervalLength == 0 {
 		return
 	}
-	smearedPixel := seam[0]
+	for i := 0; i < intervalLength; i++ {
+		/// select pixel and copy it up to Config.Length
+		smearedPixel := seam[i]
 
-	for idx := range seam {
-		seam[idx] = smearedPixel
+		max := int(math.Min(float64(i + shared.Config.SectionLength), float64(intervalLength)))
+		for ii := i; ii < max; ii++ {
+			seam[ii] = smearedPixel
+			i++ /// step i inline
+		}
 	}
 }
 
