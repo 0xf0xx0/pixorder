@@ -48,8 +48,8 @@ func main() {
 	app := &cli.Command{
 		Name:                   "pixorder",
 		Usage:                  "Organize pixels.",
-		UsageText:              "string",
-		Version:                "0.9.0",
+		UsageText:              "pixorder [options] -i <image> [-i <image>]...",
+		Version:                "0.10.0",
 		UseShortOptionHandling: true,
 		EnableShellCompletion:  true,
 		Flags: []cli.Flag{

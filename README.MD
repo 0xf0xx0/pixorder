@@ -19,6 +19,9 @@ furst time using go, might be cursed
 ## wanted features
 - even more patterns
   - https://github.com/satyarth/pixelsort/issues/30
+- sort by light direction
+    https://www.mathworks.com/matlabcentral/answers/276952-how-can-i-find-direction-of-light-in-image#answer_1513884
+    https://github.com/Anirudh-Shrikanth/light_source_direction_detection/blob/master/final_code.m
 - completion? im lazy
 
 ## install
