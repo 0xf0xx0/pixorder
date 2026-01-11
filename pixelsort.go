@@ -18,10 +18,10 @@ import (
 	"strings"
 	"time"
 
-	"pixorder/comparators"
-	"pixorder/intervals"
-	"pixorder/patterns"
-	"pixorder/shared"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/comparators"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/intervals"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/patterns"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/shared"
 
 	"github.com/kovidgoyal/imaging"
 	"github.com/remeh/sizedwaitgroup"

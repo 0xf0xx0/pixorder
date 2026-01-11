@@ -1,8 +1,8 @@
 package comparators
 
 import (
-	"pixorder/shared"
-	"pixorder/types"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/shared"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/types"
 )
 
 var ComparatorFunctionMappings = map[string]types.ComparatorFunc{

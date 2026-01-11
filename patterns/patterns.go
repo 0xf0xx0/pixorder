@@ -6,7 +6,7 @@ import (
 	"image/draw"
 	"math"
 
-	"pixorder/types"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/types"
 )
 // spits out seams to be sorted
 //

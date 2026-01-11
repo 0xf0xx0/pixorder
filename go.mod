@@ -1,4 +1,4 @@
-module pixorder
+module git.0xf0xx0.eth.limo/0xf0xx0/pixorder
 
 go 1.24.1
 

@@ -5,9 +5,9 @@ import (
 	mathRand "math/rand"
 	"slices"
 
-	"pixorder/comparators"
-	"pixorder/shared"
-	"pixorder/types"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/comparators"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/shared"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/types"
 )
 
 /// seam building functions + some alt "sorts"

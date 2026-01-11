@@ -2,7 +2,7 @@ package shared
 
 /// global var to hold config instead of passing it everywhere
 import (
-	"pixorder/types"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/types"
 )
 
 var Config struct {

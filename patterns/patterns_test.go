@@ -2,15 +2,13 @@ package patterns_test
 
 /// merge into 1 func?
 import (
-	//"fmt"
 	"crypto/rand"
 	"testing"
 
 	"image"
 	"image/color"
-	"pixorder/patterns"
-	"pixorder/types"
-	// "pixorder/types"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/patterns"
+	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/types"
 )
 
 func TestLoadRow(t *testing.T) {
