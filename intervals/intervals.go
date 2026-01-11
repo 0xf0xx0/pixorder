@@ -2,7 +2,7 @@ package intervals
 
 import (
 	"math"
-	mathRand "math/rand"
+	"math/rand"
 	"slices"
 
 	"git.0xf0xx0.eth.limo/0xf0xx0/pixorder/comparators"
@@ -39,7 +39,7 @@ func Shuffle(seam []types.PixelWithMask) {
 	/// we want shuffling to respect thresholds/masks too, so
 	/// use the result to determine whether to skip or not
 	comparator := comparators.ComparatorFunctionMappings[shared.Config.Comparator]
-	mathRand.Shuffle(len(seam), func(i, j int) {
+	rand.Shuffle(len(seam), func(i, j int) {
 		skip := comparator(seam[i], seam[j])
 		if skip != 0 {
 			seam[i], seam[j] = seam[j], seam[i]
@@ -81,7 +81,7 @@ func Random(seam []types.PixelWithMask) {
 			break
 		}
 		randLength := randBetween((intervalLength - j), 1)
-		if mathRand.Float32() < shared.Config.Randomness {
+		if rand.Float32() < shared.Config.Randomness {
 			endIdx := min(j+randLength, intervalLength)
 			stretches = append(stretches, types.PixelStretch{Start: j, End: endIdx})
 		}
@@ -128,7 +128,7 @@ func randBetween(max int, min_opt ...int) int {
 	if len(min_opt) > 0 {
 		min = min_opt[0]
 	}
-	randNum := mathRand.Float64()
+	randNum := rand.Float64()
 	if min != 0 {
 		return int(math.Floor(randNum*float64(((+max)+1)-(+min)))) + (+min)
 	}
